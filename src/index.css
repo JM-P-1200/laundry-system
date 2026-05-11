@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+:root {
+  --brand-blue: #0056b3; /* Professional Deep Blue */
+  --soft-white: #f8f9fa;
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: #333;
+}
+
+.bg-brand-blue { background-color: var(--brand-blue); }
+.text-brand-blue { color: var(--brand-blue); }
+
+.btn-primary {
+  background-color: var(--brand-blue);
+  border: none;
+  padding: 10px 25px;
+  font-weight: 600;
+}
+
+.hero-section {
+  padding: 100px 0;
+  background: linear-gradient(135deg, #ffffff 0%, #e9ecef 100%);
+}
