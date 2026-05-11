@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 
 // Common UI Components
 import Navbar from './components/common/Navbar';
@@ -16,34 +16,39 @@ import Dashboard from './pages/Dashboard';
 import NewOrder from './pages/NewOrder';
 import OrderHistory from './pages/OrderHistory';
 import Inventory from './pages/Inventory';
-import TrackOrder from './pages/TrackOrder';
 import ManageQueue from './pages/ManageQueue';
+import TrackOrder from './pages/TrackOrder';
+import Login from './pages/Login';
 
 /**
- * LayoutWrapper handles the visual switch between:
- * 1. The Public Website (Navbar + Footer)
- * 2. The Admin System (Sidebar)
+ * Gatekeeper: Only allows access to children if 'isAdmin' is true in localStorage.
+ */
+const ProtectedRoute = ({ children }) => {
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
+  return isAdmin ? children : <Navigate to="/login" replace />;
+};
+
+/**
+ * LayoutWrapper handles the visual switch between Public and Admin UI.
  */
 const LayoutWrapper = ({ children }) => {
   const location = useLocation();
   
-  // List every path that should show the Admin Sidebar here
   const adminPaths = ['/dashboard', '/new-order', '/history', '/inventory', '/queue'];
   const isAdminPath = adminPaths.includes(location.pathname);
+  const isLoginPage = location.pathname === '/login';
 
   return (
     <>
-      {/* Show Navbar only on Public Pages */}
-      {!isAdminPath && <Navbar />}
+      {/* Hide Navbar/Footer on Admin pages AND Login page */}
+      {!isAdminPath && !isLoginPage && <Navbar />}
 
       <div className={isAdminPath ? "d-flex" : "container-fluid p-0"}>
-        {/* Show Sidebar only on Admin Pages */}
         {isAdminPath && <Sidebar />}
 
         <main className="flex-grow-1">
           {children}
-          {/* Show Footer only on Public Pages */}
-          {!isAdminPath && <Footer />}
+          {!isAdminPath && !isLoginPage && <Footer />}
         </main>
       </div>
     </>
@@ -63,13 +68,14 @@ function App() {
           <Route path="/products" element={<Products />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/track" element={<TrackOrder />} />
-          <Route path="/queue" element={<ManageQueue />} />
+          <Route path="/login" element={<Login />} />
           
-          {/* Admin/Dashboard Routes */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/new-order" element={<NewOrder />} />
-          <Route path="/history" element={<OrderHistory />} />
-          <Route path="/inventory" element={<Inventory />} />
+          {/* Protected Admin Routes */}
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/new-order" element={<ProtectedRoute><NewOrder /></ProtectedRoute>} />
+          <Route path="/history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
+          <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+          <Route path="/queue" element={<ProtectedRoute><ManageQueue /></ProtectedRoute>} />
         </Routes>
       </LayoutWrapper>
     </Router>
