@@ -19,9 +19,10 @@ import Inventory from './pages/Inventory';
 import ManageQueue from './pages/ManageQueue';
 import TrackOrder from './pages/TrackOrder';
 import Login from './pages/Login';
+import Customers from './pages/Customers'; // New Import
 
 /**
- * Gatekeeper: Only allows access to children if 'isAdmin' is true in localStorage.
+ * Gatekeeper: Ensures only logged-in staff can access admin pages.
  */
 const ProtectedRoute = ({ children }) => {
   const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -29,18 +30,19 @@ const ProtectedRoute = ({ children }) => {
 };
 
 /**
- * LayoutWrapper handles the visual switch between Public and Admin UI.
+ * LayoutWrapper: Switches between the Marketing UI and the Admin UI.
  */
 const LayoutWrapper = ({ children }) => {
   const location = useLocation();
   
-  const adminPaths = ['/dashboard', '/new-order', '/history', '/inventory', '/queue'];
+  // Update: Included '/customers' in admin paths
+  const adminPaths = ['/dashboard', '/new-order', '/history', '/inventory', '/queue', '/customers'];
   const isAdminPath = adminPaths.includes(location.pathname);
   const isLoginPage = location.pathname === '/login';
 
   return (
     <>
-      {/* Hide Navbar/Footer on Admin pages AND Login page */}
+      {/* Show Navbar/Footer only on public, non-login pages */}
       {!isAdminPath && !isLoginPage && <Navbar />}
 
       <div className={isAdminPath ? "d-flex" : "container-fluid p-0"}>
@@ -60,7 +62,7 @@ function App() {
     <Router>
       <LayoutWrapper>
         <Routes>
-          {/* Public Routes */}
+          {/* Public Website */}
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -70,12 +72,13 @@ function App() {
           <Route path="/track" element={<TrackOrder />} />
           <Route path="/login" element={<Login />} />
           
-          {/* Protected Admin Routes */}
+          {/* Protected Admin Tools */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/new-order" element={<ProtectedRoute><NewOrder /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
           <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
           <Route path="/queue" element={<ProtectedRoute><ManageQueue /></ProtectedRoute>} />
+          <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
         </Routes>
       </LayoutWrapper>
     </Router>

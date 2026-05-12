@@ -5,17 +5,19 @@ const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Navigation config for the Admin section
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: '📊' },
     { name: 'New Order', path: '/new-order', icon: '➕' },
     { name: 'Active Queue', path: '/queue', icon: '🧼' },
     { name: 'Order History', path: '/history', icon: '📜' },
+    { name: 'Customers', path: '/customers', icon: '👥' }, // New Item
     { name: 'Inventory', path: '/inventory', icon: '📦' },
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem('isAdmin'); // Clear the session
-    navigate('/login'); // Boot back to login
+    localStorage.removeItem('isAdmin');
+    navigate('/login');
   };
 
   return (
