@@ -1,18 +1,20 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useSettings } from '../../context/SettingsContext';
 
 const Sidebar = () => {
+  const { settings } = useSettings();
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Navigation config for the Admin section
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: '📊' },
     { name: 'New Order', path: '/new-order', icon: '➕' },
     { name: 'Active Queue', path: '/queue', icon: '🧼' },
     { name: 'Order History', path: '/history', icon: '📜' },
-    { name: 'Customers', path: '/customers', icon: '👥' }, // New Item
+    { name: 'Customers', path: '/customers', icon: '👥' },
     { name: 'Inventory', path: '/inventory', icon: '📦' },
+    { name: 'Settings', path: '/settings', icon: '⚙️' }, 
   ];
 
   const handleLogout = () => {
@@ -21,9 +23,10 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark shadow" style={{ width: '280px', height: '100vh', position: 'sticky', top: 0 }}>
-      <Link to="/dashboard" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <span className="fs-4 fw-bold text-info">🫧 BubbleWorks</span>
+    <div className="d-flex flex-column ... bg-dark shadow" style={{ width: '280px', height: '100vh', position: 'sticky', top: 0 }}>
+      <Link to="/dashboard" className="d-flex align-items-center mb-3 ... text-decoration-none">
+        {/* 3. Replace "BubbleWorks" with the dynamic name below */}
+        <span className="fs-4 fw-bold text-info">🫧 {settings.shopName}</span>
       </Link>
       <hr />
       

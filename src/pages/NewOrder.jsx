@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Add this
+import { useNavigate } from 'react-router-dom';
+import { useSettings } from '../context/SettingsContext';
 
 const NewOrder = () => {
-  const navigate = useNavigate(); // Initialize navigation
+  const { settings } = useSettings(); // Initialize navigation
+  const navigate = useNavigate();
   
   // Helper: ID Generator
   const generateId = () => `BW-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -19,12 +21,16 @@ const NewOrder = () => {
     total: '0.00'
   });
 
-  const prices = { 'Wash & Fold': 2.0, 'Dry Clean': 5.0, 'Ironing': 1.5 };
+  const prices = { 
+    'Wash & Fold': settings.pricePerKg, 
+    'Dry Clean': settings.pricePerKg * 2.5, // Maybe dry clean is always 2.5x base price?
+    'Ironing': settings.pricePerKg * 0.75 
+  };
 
   // Price Logic
   useEffect(() => {
     const servicePrice = prices[orderData.service] * orderData.weight;
-    const deliveryFee = orderData.method === 'Delivery' ? 5.0 : 0.0;
+    const deliveryFee = orderData.method === 'Delivery' ? settings.deliveryFee : 0.0;
     setOrderData(prev => ({ ...prev, total: (servicePrice + deliveryFee).toFixed(2) }));
   }, [orderData.weight, orderData.service, orderData.method]);
 
@@ -97,8 +103,22 @@ const NewOrder = () => {
               <div>
                 <label className="form-label fw-bold small">Method</label>
                 <div className="d-flex gap-2">
-                  <button type="button" className={`btn flex-grow-1 ${orderData.method === 'Pick-up' ? 'btn-primary' : 'btn-outline-primary'}`} onClick={() => setOrderData({...orderData, method: 'Pick-up'})}>Pick-up</button>
-                  <button type="button" className={`btn flex-grow-1 ${orderData.method === 'Delivery' ? 'btn-primary' : 'btn-outline-primary'}`} onClick={() => setOrderData({...orderData, method: 'Delivery'})}>Delivery (+$5)</button>
+                  <button 
+            type="button" 
+            className={`btn flex-grow-1 ${orderData.method === 'Pick-up' ? 'btn-primary' : 'btn-outline-primary'}`} 
+            onClick={() => setOrderData({...orderData, method: 'Pick-up'})}
+          >
+            Pick-up
+          </button>
+          
+          <button 
+            type="button" 
+            className={`btn flex-grow-1 ${orderData.method === 'Delivery' ? 'btn-primary' : 'btn-outline-primary'}`} 
+            onClick={() => setOrderData({...orderData, method: 'Delivery'})}
+          >
+            {/* 3. SYNCED TEXT BELOW */}
+            Delivery (+{settings.currency}{settings.deliveryFee})
+          </button>
                 </div>
               </div>
             </div>

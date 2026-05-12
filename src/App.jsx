@@ -1,6 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 
+// Context Provider
+import { SettingsProvider } from './context/SettingsContext';
+
 // Common UI Components
 import Navbar from './components/common/Navbar';
 import Sidebar from './components/common/Sidebar';
@@ -19,10 +22,11 @@ import Inventory from './pages/Inventory';
 import ManageQueue from './pages/ManageQueue';
 import TrackOrder from './pages/TrackOrder';
 import Login from './pages/Login';
-import Customers from './pages/Customers'; // New Import
+import Customers from './pages/Customers';
+import Settings from './pages/Settings';
 
 /**
- * Gatekeeper: Ensures only logged-in staff can access admin pages.
+ * ProtectedRoute: The "Bouncer"
  */
 const ProtectedRoute = ({ children }) => {
   const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -30,19 +34,18 @@ const ProtectedRoute = ({ children }) => {
 };
 
 /**
- * LayoutWrapper: Switches between the Marketing UI and the Admin UI.
+ * LayoutWrapper: Decides what the user sees (Public vs Admin UI)
  */
 const LayoutWrapper = ({ children }) => {
   const location = useLocation();
   
-  // Update: Included '/customers' in admin paths
-  const adminPaths = ['/dashboard', '/new-order', '/history', '/inventory', '/queue', '/customers'];
+  // Every URL here will show the Sidebar instead of the Navbar
+  const adminPaths = ['/dashboard', '/new-order', '/history', '/inventory', '/queue', '/customers', '/settings'];
   const isAdminPath = adminPaths.includes(location.pathname);
   const isLoginPage = location.pathname === '/login';
 
   return (
     <>
-      {/* Show Navbar/Footer only on public, non-login pages */}
       {!isAdminPath && !isLoginPage && <Navbar />}
 
       <div className={isAdminPath ? "d-flex" : "container-fluid p-0"}>
@@ -59,29 +62,32 @@ const LayoutWrapper = ({ children }) => {
 
 function App() {
   return (
-    <Router>
-      <LayoutWrapper>
-        <Routes>
-          {/* Public Website */}
-          <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/track" element={<TrackOrder />} />
-          <Route path="/login" element={<Login />} />
-          
-          {/* Protected Admin Tools */}
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/new-order" element={<ProtectedRoute><NewOrder /></ProtectedRoute>} />
-          <Route path="/history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
-          <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
-          <Route path="/queue" element={<ProtectedRoute><ManageQueue /></ProtectedRoute>} />
-          <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
-        </Routes>
-      </LayoutWrapper>
-    </Router>
+    <SettingsProvider>
+      <Router>
+        <LayoutWrapper>
+          <Routes>
+            {/* Public Pages */}
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/track" element={<TrackOrder />} />
+            <Route path="/login" element={<Login />} />
+            
+            {/* Admin Pages (Protected) */}
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/new-order" element={<ProtectedRoute><NewOrder /></ProtectedRoute>} />
+            <Route path="/history" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
+            <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+            <Route path="/queue" element={<ProtectedRoute><ManageQueue /></ProtectedRoute>} />
+            <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+          </Routes>
+        </LayoutWrapper>
+      </Router>
+    </SettingsProvider>
   );
 }
 
