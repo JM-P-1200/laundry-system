@@ -8,6 +8,7 @@ const PublicLayout = () => {
     <div className="d-flex flex-column min-vh-100">
       <Navbar />
       <main className="flex-grow-1">
+        {/* Entry point for Home, Login, etc. */}
         <Outlet />
       </main>
       <Footer />
