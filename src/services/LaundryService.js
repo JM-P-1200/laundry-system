@@ -9,24 +9,46 @@ const SYSTEM_TAG = 'laundry_v1';
 const laundryService = {
   // --- Settings ---
   async getSettings() {
-    const { data, error } = await supabase
-      .from('shop_settings')
-      .select('*')
-      .eq('system_tag', SYSTEM_TAG)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('shop_settings')
+        .select('*')
+        .eq('system_tag', SYSTEM_TAG)
+        .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+      if (error) {
+        console.error("Supabase read error:", error.message);
+        return null;
+      }
+      
+      return data;
+    } catch (err) {
+      console.error("Unhandled service fetch block:", err);
+      return null;
+    }
   },
 
   async saveSettings(settings) {
-    const { data, error } = await supabase
-      .from('shop_settings')
-      .upsert({ ...settings, system_tag: SYSTEM_TAG, updated_at: new Date().toISOString() }, { onConflict: 'system_tag' })
-      .select();
-    if (error) throw error;
-    return data[0];
-  },
+    const cleanPayload = {
+    system_tag: SYSTEM_TAG,
+    shop_name: settings.shop_name || 'BubbleWorks',
+    price_per_kg: parseFloat(settings.price_per_kg) || 2.00,
+    currency: settings.currency || '$',
+    delivery_fee: parseFloat(settings.delivery_fee) || 5.00,
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await supabase
+    .from('shop_settings')
+    .upsert(cleanPayload, { onConflict: 'system_tag' })
+    .select();
+    
+  if (error) {
+    console.error("Supabase Database Write Error Details:", error);
+    throw error;
+  }
+  return data[0];
+},
 
   // --- Orders (The Fix) ---
   async createOrder(orderData) {
