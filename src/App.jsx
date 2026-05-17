@@ -16,13 +16,13 @@ import Login from './pages/Login';
 import TrackOrder from './pages/TrackOrder';
 
 // Admin System Pages
-import Dashboard from './pages/Dashboard';
+import { Dashboard } from './pages/Dashboard';
 import { NewOrder } from './pages/NewOrder';
 import { ActiveQueue } from './pages/ActiveQueue';
 import ManageQueue from './pages/ManageQueue';
-import Inventory from './pages/Inventory';
-import Customers from './pages/Customers';
-import OrderHistory from './pages/OrderHistory';
+import { Inventory } from './pages/Inventory';
+import { Customers } from './pages/Customers';
+import { OrderHistory } from './pages/OrderHistory';
 import Settings from './pages/Settings';
 
 /**

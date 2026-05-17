@@ -176,7 +176,71 @@ const laundryService = {
 
     if (error) throw error;
     return data[0];
+  },
+
+  // --- 📦 Inventory Management ---
+  async getInventory() {
+    const { data, error } = await supabase
+      .from('inventory')
+      .select('*')
+      .eq('system_tag', SYSTEM_TAG)
+      .order('item_name', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+
+  async adjustStock(itemId, newLevel) {
+    const { data, error } = await supabase
+      .from('inventory')
+      .update({ stock_level: Math.max(0, newLevel), updated_at: new Date().toISOString() })
+      .eq('id', itemId)
+      .select();
+    if (error) throw error;
+    return data[0];
+  },
+
+  // --- 📜 Historical Archives & Dashboard Computations ---
+  async getAllHistoricalOrders() {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('system_tag', SYSTEM_TAG)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+
+  /**
+   * Fetches real-time snapshot metrics to compile operational overview analytics
+   */
+  async getDashboardMetrics() {
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('system_tag', SYSTEM_TAG);
+      
+    if (error) throw error;
+
+    let totalOrders = orders.length;
+    let inProgress = orders.filter(o => ['Sorting', 'Washing', 'Drying'].includes(o.order_status)).length;
+    let readyForPickup = orders.filter(o => o.order_status === 'Ready').length;
+    
+    // Sum absolute financial grand totals
+    let revenue = orders.reduce((sum, order) => {
+      const itemsSum = order.order_items?.reduce((s, i) => s + (parseFloat(i.weight_kg * i.unit_price) || 0), 0) || 0;
+      const deliveryPremium = order.delivery_type === 'Delivery' ? 5 : 0; // standard fallback alignment
+      return sum + itemsSum + deliveryPremium;
+    }, 0);
+
+    return {
+      totalOrders,
+      inProgress,
+      readyForPickup,
+      revenue,
+      recentActivity: orders.slice(-5).reverse() // grab trailing five log events
+    };
   }
+
 };
 
 // Exporting as a default object to ensure "not a function" errors are impossible
