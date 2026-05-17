@@ -1,96 +1,100 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSettings } from '../context/SettingsContext';
-import { laundryService } from '../services/laundryService';
+import laundryService from '../services/laundryService'; // Updated Import
 
 const NewOrder = () => {
-  const { settings } = useSettings();
+  const { settings, loading } = useSettings();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [orderData, setOrderData] = useState({
+  const [formData, setFormData] = useState({
     customer_name: '',
     contact: '',
-    weight: 0,
+    weight: '',
     service_type: 'Wash & Fold',
     delivery_method: 'Pick-up'
   });
 
+  const estimatedTotal = useMemo(() => {
+    const weightVal = parseFloat(formData.weight) || 0;
+    const base = (parseFloat(settings?.price_per_kg) || 0) * weightVal;
+    const delivery = formData.delivery_method === 'Delivery' ? (parseFloat(settings?.delivery_fee) || 0) : 0;
+    return (base + delivery).toFixed(2);
+  }, [formData.weight, formData.delivery_method, settings]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || loading) return;
 
     setIsSubmitting(true);
-    
-    // Logic: Calculate total based on Cloud Settings
-    const basePrice = parseFloat(settings.price_per_kg) * parseFloat(orderData.weight);
-    const deliveryFee = orderData.delivery_method === 'Delivery' ? parseFloat(settings.delivery_fee) : 0;
-    const finalTotal = basePrice + deliveryFee;
-
-    const payload = {
-      id: `BW-${Date.now()}`, // Unique ID Generation
-      customer_name: orderData.customer_name,
-      contact: orderData.contact,
-      weight: orderData.weight,
-      service_type: orderData.service_type,
-      delivery_method: orderData.delivery_method,
-      total_price: finalTotal.toFixed(2),
-      status: 'Received'
-    };
-
     try {
+      const payload = {
+        id: `BW-${Date.now()}`,
+        ...formData,
+        total_price: estimatedTotal
+      };
+
       await laundryService.createOrder(payload);
-      alert("Order Synced to Cloud Successfully!");
       navigate('/dashboard');
     } catch (err) {
-      alert("Cloud Sync Failed. Check Console.");
+      alert(`Cloud Sync Failed: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (loading) return <div className="p-5 text-center">Syncing Database...</div>;
+
   return (
-    <div className="p-4 max-w-2xl mx-auto">
-      <h2 className="fw-bold text-brand-blue mb-4">New Order Entry</h2>
-      <form onSubmit={handleSubmit} className="card border-0 shadow-sm p-4">
-        <div className="row g-3">
-          <div className="col-md-6">
-            <label className="form-label small fw-bold text-muted">Customer Name</label>
-            <input 
-              type="text" 
-              className="form-control" 
-              required
-              onChange={(e) => setOrderData({...orderData, customer_name: e.target.value})}
-            />
+    <div className="p-4 animate__animated animate__fadeIn" style={{ maxWidth: '900px' }}>
+      <header className="mb-5">
+        <h1 className="fw-bold text-primary mb-1">New Order</h1>
+        <p className="text-muted">Cloud-synced RDBMS transaction entry.</p>
+      </header>
+
+      <form onSubmit={handleSubmit} className="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div className="row g-4">
+          <div className="col-md-8">
+            <label className="small fw-bold text-muted text-uppercase mb-2 d-block">Customer Name</label>
+            <input type="text" className="form-control form-control-lg border-light-subtle bg-light" required
+              value={formData.customer_name} onChange={(e) => setFormData({...formData, customer_name: e.target.value})} />
           </div>
-          <div className="col-md-6">
-            <label className="form-label small fw-bold text-muted">Contact Number</label>
-            <input 
-              type="text" 
-              className="form-control" 
-              onChange={(e) => setOrderData({...orderData, contact: e.target.value})}
-            />
+          <div className="col-md-4">
+            <label className="small fw-bold text-muted text-uppercase mb-2 d-block">Contact Number</label>
+            <input type="text" className="form-control form-control-lg border-light-subtle bg-light" 
+              value={formData.contact} onChange={(e) => setFormData({...formData, contact: e.target.value})} />
           </div>
-          <div className="col-md-12">
-            <label className="form-label small fw-bold text-muted">Weight (kg)</label>
-            <input 
-              type="number" 
-              className="form-control" 
-              step="0.1" 
-              required
-              onChange={(e) => setOrderData({...orderData, weight: e.target.value})}
-            />
+          <div className="col-md-4">
+            <label className="small fw-bold text-muted text-uppercase mb-2 d-block">Weight (KG)</label>
+            <input type="number" className="form-control form-control-lg border-light-subtle bg-light" required
+              value={formData.weight} onChange={(e) => setFormData({...formData, weight: e.target.value})} />
+          </div>
+          <div className="col-md-4">
+            <label className="small fw-bold text-muted text-uppercase mb-2 d-block">Service</label>
+            <select className="form-select form-select-lg border-light-subtle bg-light"
+              value={formData.service_type} onChange={(e) => setFormData({...formData, service_type: e.target.value})}>
+              <option value="Wash & Fold">Wash & Fold</option>
+              <option value="Dry Clean">Dry Clean</option>
+            </select>
+          </div>
+          <div className="col-md-4">
+            <label className="small fw-bold text-muted text-uppercase mb-2 d-block">Method</label>
+            <select className="form-select form-select-lg border-light-subtle bg-light"
+              value={formData.delivery_method} onChange={(e) => setFormData({...formData, delivery_method: e.target.value})}>
+              <option value="Pick-up">Pick-up</option>
+              <option value="Delivery">Delivery</option>
+            </select>
           </div>
         </div>
 
-        <button 
-          type="submit" 
-          disabled={isSubmitting}
-          className="btn btn-primary w-100 mt-4 py-2 fw-bold"
-        >
-          {isSubmitting ? (
-            <span className="spinner-border spinner-border-sm me-2"></span>
-          ) : '🚀 CONFIRM & SAVE TO CLOUD'}
+        <div className="mt-5 pt-4 border-top d-flex justify-content-between align-items-center">
+          <h5 className="fw-bold text-muted m-0 small">ESTIMATED TOTAL</h5>
+          <h2 className="fw-bold text-primary m-0">{settings?.currency || '$'}{estimatedTotal}</h2>
+        </div>
+
+        <button type="submit" disabled={isSubmitting} className="btn btn-primary w-100 py-3 mt-4 fw-bold shadow-sm">
+          {isSubmitting ? 'Syncing...' : '🚀 CONFIRM & SAVE TO CLOUD'}
         </button>
       </form>
     </div>

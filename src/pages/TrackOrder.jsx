@@ -1,67 +1,91 @@
 import React, { useState } from 'react';
+import laundryService from '../services/laundryService';
 
 const TrackOrder = () => {
-  const [id, setId] = useState('');
+  const [orderId, setOrderId] = useState('');
   const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleTrack = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    if (id.length < 4) return alert("Enter valid ID");
-    
-    // MOCK DATA for any ID
-    setOrder({
-      id: id.toUpperCase(),
-      status: 2, // 0 to 3
-      method: id.toLowerCase().includes('del') ? 'Delivery' : 'Pick-up',
-      steps: ["Received", "In Washer", "Folding", "Ready"]
-    });
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await laundryService.trackOrder(orderId.toUpperCase());
+      setOrder(data);
+    } catch (err) {
+      setError("Order not found. Please check your Receipt ID.");
+      setOrder(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="container py-5" style={{ maxWidth: '700px' }}>
-      <div className="text-center mb-5">
-        <h2 className="fw-bold text-brand-blue">Track Your Laundry</h2>
-        <p className="text-muted">Stay updated on your garments' journey.</p>
-      </div>
-
-      <form onSubmit={handleTrack} className="input-group input-group-lg mb-5 shadow-sm">
-        <input type="text" className="form-control border-primary" placeholder="BW-2026-XXXX" onChange={(e) => setId(e.target.value)} />
-        <button className="btn btn-primary px-4">Track</button>
-      </form>
-
-      {order && (
-        <div className="card border-0 shadow-lg p-4">
-          <div className="d-flex justify-content-between mb-4">
-            <span className="badge bg-primary px-3">{order.id}</span>
-            <span className="text-muted fw-bold">{order.method}</span>
+    <div className="container py-5 mt-5">
+      <div className="row justify-content-center">
+        <div className="col-md-6">
+          <div className="text-center mb-5">
+            <h1 className="fw-bold display-6">Track Your Laundry</h1>
+            <p className="text-muted">Enter your Order ID (e.g., BW-2026-XXXX) to see live progress.</p>
           </div>
 
-          {/* Progress Stepper */}
-          <div className="d-flex justify-content-between mb-5 position-relative">
-            <div className="progress w-100 position-absolute" style={{ height: '3px', top: '15px', zIndex: 0 }}>
-              <div className="progress-bar bg-success" style={{ width: `${(order.status / 3) * 100}%` }}></div>
+          <form onSubmit={handleSearch} className="mb-5">
+            <div className="input-group input-group-lg shadow-sm">
+              <input 
+                type="text" 
+                className="form-control border-0 px-4" 
+                placeholder="BW-XXXX-XXXX"
+                value={orderId}
+                onChange={(e) => setOrderId(e.target.value)}
+                required
+              />
+              <button className="btn btn-primary px-4 fw-bold" type="submit" disabled={loading}>
+                {loading ? 'Searching...' : 'TRACK'}
+              </button>
             </div>
-            {order.steps.map((step, i) => (
-              <div key={i} className="text-center" style={{ zIndex: 1, width: '70px' }}>
-                <div className={`rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center ${i <= order.status ? 'bg-success text-white' : 'bg-white border'}`} style={{ width: '30px', height: '30px', fontSize: '12px' }}>
-                  {i < order.status ? '✓' : i + 1}
-                </div>
-                <small className="fw-bold" style={{ fontSize: '9px' }}>{step}</small>
-              </div>
-            ))}
-          </div>
+            {error && <div className="text-danger small mt-2 px-2 fw-medium">⚠️ {error}</div>}
+          </form>
 
-          {/* Live Delivery Map Placeholder */}
-          {order.method === 'Delivery' && order.status === 3 && (
-            <div className="bg-light p-4 rounded-3 text-center border mt-3">
-              <h6 className="fw-bold mb-3 text-start">📍 Live Rider Tracking</h6>
-              <div className="display-4">🚚</div>
-              <p className="mb-0 fw-bold text-primary">Rider is nearby!</p>
-              <p className="text-muted small">Estimated arrival: 4 mins</p>
+          {order && (
+            <div className="card border-0 shadow-lg rounded-4 overflow-hidden animate__animated animate__fadeInUp">
+              <div className="bg-primary p-4 text-white">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <small className="opacity-75 text-uppercase fw-bold">Order ID</small>
+                    <h4 className="mb-0 fw-bold">{order.id}</h4>
+                  </div>
+                  <div className="text-end">
+                    <small className="opacity-75 text-uppercase fw-bold">Current Status</small>
+                    <h5 className="mb-0 fw-bold">{order.status}</h5>
+                  </div>
+                </div>
+              </div>
+              <div className="card-body p-4 bg-white">
+                <div className="mb-4">
+                  <label className="small text-muted text-uppercase fw-bold">Customer Name</label>
+                  <p className="fs-5 fw-medium mb-0">{order.customer_name}</p>
+                </div>
+                {/* 8pt Grid Timeline */}
+                <div className="position-relative pt-2 pb-4">
+                  <div className="progress" style={{ height: '4px' }}>
+                    <div 
+                      className="progress-bar bg-success" 
+                      style={{ width: order.status === 'Ready' ? '100%' : '50%' }}
+                    ></div>
+                  </div>
+                  <div className="d-flex justify-content-between mt-3 small fw-bold text-muted">
+                    <span className="text-success">RECEIVED</span>
+                    <span className={order.status !== 'Received' ? 'text-success' : ''}>IN PROGRESS</span>
+                    <span className={order.status === 'Ready' ? 'text-success' : ''}>READY</span>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

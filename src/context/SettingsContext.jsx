@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
-import { laundryService } from '../services/laundryService';
+import laundryService from '../services/laundryService';
 
 const SettingsContext = createContext({
   settings: null,
