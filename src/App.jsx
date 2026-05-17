@@ -17,7 +17,8 @@ import TrackOrder from './pages/TrackOrder';
 
 // Admin System Pages
 import Dashboard from './pages/Dashboard';
-import NewOrder from './pages/NewOrder';
+import { NewOrder } from './pages/NewOrder';
+import { ActiveQueue } from './pages/ActiveQueue';
 import ManageQueue from './pages/ManageQueue';
 import Inventory from './pages/Inventory';
 import Customers from './pages/Customers';
@@ -59,6 +60,7 @@ function App() {
           <Route element={<AdminLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/new-order" element={<NewOrder />} />
+            <Route path="/queue" element={<ActiveQueue />} />
             <Route path="/queue" element={<ManageQueue />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/customers" element={<Customers />} />
