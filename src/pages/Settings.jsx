@@ -16,7 +16,12 @@ const Settings = () => {
   // Sync internal state when context loads
   useEffect(() => {
     if (settings) {
-      setFormData({ ...settings });
+      setFormData({ 
+      shop_name: settings.shop_name || '',
+      price_per_kg: settings.price_per_kg || '',
+      delivery_fee: settings.delivery_fee || '',
+      address: settings.address || ''
+       });
     }
   }, [settings]);
 
@@ -46,8 +51,8 @@ const Settings = () => {
               <input 
                 type="text" 
                 className="form-control" 
-                value={formData.shopName}
-                onChange={(e) => setFormData({...formData, shopName: e.target.value})}
+                value={formData.shop_name || ''}
+                onChange={(e) => setFormData({...formData, shop_name: e.target.value})}
                 required
               />
             </div>
@@ -59,8 +64,8 @@ const Settings = () => {
                   type="number" 
                   step="0.01"
                   className="form-control" 
-                  value={formData.pricePerKg}
-                  onChange={(e) => setFormData({...formData, pricePerKg: parseFloat(e.target.value) || 0})}
+                  value={formData.price_per_kg || ''}
+                  onChange={(e) => setFormData({...formData, price_per_kg: e.target.value })}
                 />
               </div>
               <div className="col-md-6">
@@ -69,8 +74,8 @@ const Settings = () => {
                   type="number" 
                   step="0.1"
                   className="form-control" 
-                  value={formData.deliveryFee}
-                  onChange={(e) => setFormData({...formData, deliveryFee: parseFloat(e.target.value) || 0})}
+                  value={formData.delivery_fee || ''}
+                  onChange={(e) => setFormData({...formData, delivery_fee: e.target.value })}
                 />
               </div>
             </div>
@@ -80,8 +85,8 @@ const Settings = () => {
               <textarea 
                 className="form-control" 
                 rows="2"
-                value={formData.address}
-                onChange={(e) => setFormData({...formData, address: e.target.value})}
+                value={formData.address  || ''}
+                onChange={(e) => setFormData({...formData, address: e.target.value })}
               ></textarea>
             </div>
 

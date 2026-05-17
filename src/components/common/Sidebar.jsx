@@ -23,14 +23,16 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="d-flex flex-column ... bg-dark shadow" style={{ width: '280px', height: '100vh', position: 'sticky', top: 0 }}>
-      <Link to="/dashboard" className="d-flex align-items-center mb-3 ... text-decoration-none">
-        {/* 3. Replace "BubbleWorks" with the dynamic name below */}
-        <span className="fs-4 fw-bold text-info">🫧 {settings.shopName}</span>
-      </Link>
-      <hr />
+    <div className="d-flex flex-column bg-dark shadow" style={{ width: '280px', height: '100vh', position: 'sticky', top: 0 }}>
+      <div className="p-3">
+        <Link to="/dashboard" className="d-flex align-items-center mb-3 text-decoration-none">
+          {/* 🛠️ FIXED: Shifted from shopName to matching schema key shop_name */}
+          <span className="fs-4 fw-bold text-info">🫧 {settings?.shop_name || 'BubbleWorks'}</span>
+        </Link>
+      </div>
+      <hr className="text-secondary mt-0" />
       
-      <ul className="nav nav-pills flex-column mb-auto">
+      <ul className="nav nav-pills flex-column mb-auto px-3">
         {navItems.map((item) => (
           <li className="nav-item" key={item.path}>
             <Link 
@@ -43,9 +45,9 @@ const Sidebar = () => {
         ))}
       </ul>
 
-      <hr />
+      <hr className="text-secondary" />
       
-      <div className="pb-2">
+      <div className="p-3 pb-4">
         <button 
           onClick={handleLogout} 
           className="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
