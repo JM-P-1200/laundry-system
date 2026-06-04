@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import laundryService from '../services/laundryService';
 import { useSettings } from '../context/SettingsContext';
 
@@ -19,6 +19,8 @@ export const ActiveQueue = () => {
   };
 
   useEffect(() => {
+    // The async loader updates state after the database response resolves.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchQueue();
   }, []);
 
@@ -51,7 +53,7 @@ export const ActiveQueue = () => {
 
   return (
     <div className="container py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
         <h2 className="fw-bold text-dark m-0">🫧 Active Machine Operations Queue</h2>
         <span className="badge bg-primary fs-6">{queue.length} Tasks Transacting</span>
       </div>
@@ -69,15 +71,15 @@ export const ActiveQueue = () => {
             const fullTotal = itemTotalSum + (order.delivery_type === 'Delivery' ? parseFloat(settings?.delivery_fee || 0) : 0);
 
             return (
-              <div className="col-112" key={order.id}>
+              <div className="col-12" key={order.id}>
                 <div className="card border-0 shadow-sm overflow-hidden bg-white">
                   <div className="card-body p-4">
-                    <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-3">
                       <div>
                         <h4 className="fw-black text-dark mb-1">{order.customer_name}</h4>
                         <small className="text-muted font-monospace d-block">ID Reference: {order.id.slice(0,8)}... | 📱 {order.customer_phone || 'None'}</small>
                       </div>
-                      <div className="text-end">
+                      <div className="text-md-end">
                         <span className={`badge ${getStatusBadgeClass(order.order_status)} px-3 py-2 fs-6 rounded-pill fw-bold mb-2 d-inline-block`}>
                           {order.order_status}
                         </span>
@@ -88,7 +90,7 @@ export const ActiveQueue = () => {
                     <div className="bg-light rounded p-3 mb-3">
                       <h6 className="fw-bold text-secondary mb-2 small text-uppercase tracking-wider">Load Specifications:</h6>
                       {order.order_items?.map((item, idx) => (
-                        <div key={idx} className="d-flex justify-content-between text-dark border-bottom border-2 border-white pb-1 mb-1 small">
+                        <div key={idx} className="d-flex flex-column flex-md-row justify-content-between gap-1 text-dark border-bottom border-2 border-white pb-1 mb-1 small">
                           <span>⚙️ {item.service_type}</span>
                           <span className="fw-bold font-monospace">{item.weight_kg} KG (@ {settings?.currency || '$'}{parseFloat(item.unit_price).toFixed(2)})</span>
                         </div>
@@ -107,13 +109,13 @@ export const ActiveQueue = () => {
                         </div>
                         )}
 
-                    <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                    <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mt-3 pt-2 border-top">
                       <div>
                         <span className="text-muted small d-block">Financial Status:</span>
                         <span className={`badge ${order.payment_status === 'Paid' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} fw-bold`}>
                           {order.payment_status.toUpperCase()} ({order.payment_method})
                         </span>
-                        <span className="fs-5 fw-bold text-dark font-monospace ms-3">
+                        <span className="fs-5 fw-bold text-dark font-monospace d-block d-sm-inline ms-sm-3 mt-2 mt-sm-0">
                           Total: {settings?.currency || '$'}{fullTotal.toFixed(2)}
                         </span>
                       </div>
@@ -121,7 +123,7 @@ export const ActiveQueue = () => {
                       {order.order_status !== 'Ready' && (
                         <button 
                           onClick={() => handleAdvanceStatus(order.id, order.order_status)} 
-                          className="btn btn-outline-primary fw-bold d-flex align-items-center gap-2"
+                          className="btn btn-outline-primary fw-bold d-flex align-items-center justify-content-center gap-2 w-100 w-lg-auto"
                         >
                           Advance Task Status ⏩
                         </button>
@@ -129,7 +131,7 @@ export const ActiveQueue = () => {
                       {order.order_status === 'Ready' && (
                         <button 
                           onClick={() => handleAdvanceStatus(order.id, order.order_status)} 
-                          className="btn btn-success fw-bold d-flex align-items-center gap-2"
+                          className="btn btn-success fw-bold d-flex align-items-center justify-content-center gap-2 w-100 w-lg-auto"
                         >
                           📦 Complete & Offload Delivery
                         </button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSettings } from '../context/SettingsContext';
 
 const Settings = () => {
@@ -16,6 +16,8 @@ const Settings = () => {
   // Sync internal state when context loads
   useEffect(() => {
     if (settings) {
+      // Settings arrive from context after the shell loads; copy them into the editable form once available.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({ 
       shop_name: settings.shop_name || '',
       price_per_kg: settings.price_per_kg || '',
@@ -35,7 +37,7 @@ const Settings = () => {
   if (!settings) return <div className="p-4 text-muted">Initializing system...</div>;
 
   return (
-    <div className="p-4">
+    <div className="container py-4">
       <header className="mb-4">
         <h2 className="fw-bold text-brand-blue mb-1">Shop Configuration</h2>
         <p className="text-muted small">Manage global shop parameters and pricing models.</p>
@@ -57,7 +59,7 @@ const Settings = () => {
               />
             </div>
 
-            <div className="row mb-3">
+            <div className="row g-3 mb-3">
               <div className="col-md-6">
                 <label className="form-label fw-semibold small">Base Price per KG ({formData.currency})</label>
                 <input 
@@ -90,7 +92,7 @@ const Settings = () => {
               ></textarea>
             </div>
 
-            <button type="submit" className="btn btn-primary fw-bold px-4 py-2">
+            <button type="submit" className="btn btn-primary fw-bold px-4 py-2 w-100 w-sm-auto">
               APPLY CHANGES
             </button>
           </form>

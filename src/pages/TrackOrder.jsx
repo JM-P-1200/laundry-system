@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import laundryService from '../services/laundryService';
 
 const TrackOrder = () => {
@@ -12,9 +12,9 @@ const TrackOrder = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await laundryService.trackOrder(orderId.toUpperCase());
+      const data = await laundryService.trackOrder(orderId.trim());
       setOrder(data);
-    } catch (err) {
+    } catch {
       setError("Order not found. Please check your Receipt ID.");
       setOrder(null);
     } finally {
@@ -58,7 +58,7 @@ const TrackOrder = () => {
                   </div>
                   <div className="text-end">
                     <small className="opacity-75 text-uppercase fw-bold">Current Status</small>
-                    <h5 className="mb-0 fw-bold">{order.status}</h5>
+                    <h5 className="mb-0 fw-bold">{order.order_status}</h5>
                   </div>
                 </div>
               </div>
@@ -72,13 +72,13 @@ const TrackOrder = () => {
                   <div className="progress" style={{ height: '4px' }}>
                     <div 
                       className="progress-bar bg-success" 
-                      style={{ width: order.status === 'Ready' ? '100%' : '50%' }}
+                      style={{ width: order.order_status === 'Ready' ? '100%' : '50%' }}
                     ></div>
                   </div>
                   <div className="d-flex justify-content-between mt-3 small fw-bold text-muted">
                     <span className="text-success">RECEIVED</span>
-                    <span className={order.status !== 'Received' ? 'text-success' : ''}>IN PROGRESS</span>
-                    <span className={order.status === 'Ready' ? 'text-success' : ''}>READY</span>
+                    <span className={order.order_status !== 'Received' ? 'text-success' : ''}>IN PROGRESS</span>
+                    <span className={order.order_status === 'Ready' ? 'text-success' : ''}>READY</span>
                   </div>
                 </div>
               </div>

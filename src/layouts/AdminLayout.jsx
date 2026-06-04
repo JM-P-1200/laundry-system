@@ -1,16 +1,15 @@
-import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../components/common/Sidebar';
 import { useSettings } from '../context/SettingsContext';
 
 const AdminLayout = () => {
-  const { loading, settings } = useSettings();
+  const { loading } = useSettings();
   const location = useLocation();
   const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
   // 1. PRIORITY CHECK: If no auth, bounce immediately
   if (!isAdmin) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/admin-login" state={{ from: location }} replace />;
   }
 
   // 2. DATA CHECK: Show spinner only while waiting for cloud data
@@ -24,11 +23,11 @@ const AdminLayout = () => {
   }
 
   return (
-    <div className="d-flex min-vh-100 bg-light">
+    <div className="admin-shell d-flex min-vh-100 bg-light">
       <Sidebar />
-      <main className="flex-grow-1 overflow-x-hidden">
+      <main className="admin-main flex-grow-1 overflow-x-hidden">
         {/* p-4 provides 32px padding, adhering to the 8pt grid system */}
-        <div className="container-fluid p-4">
+        <div className="container-fluid admin-content p-4">
           <Outlet />
         </div>
       </main>

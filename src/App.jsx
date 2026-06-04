@@ -1,4 +1,3 @@
-import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { SettingsProvider } from './context/SettingsContext';
 
@@ -14,6 +13,7 @@ import Products from './pages/Products';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
 import TrackOrder from './pages/TrackOrder';
+import BookNow from './pages/BookNow';
 
 // Admin System Pages
 import { Dashboard } from './pages/Dashboard';
@@ -49,8 +49,11 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/track" element={<TrackOrder />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/book" element={<BookNow />} />
           </Route>
+
+          <Route path="/admin-login" element={<Login />} />
+          <Route path="/login" element={<Navigate to="/admin-login" replace />} />
 
           {/* 
             GROUP 2: INTERNAL ADMIN SYSTEM 

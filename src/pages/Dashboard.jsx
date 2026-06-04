@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import laundryService from '../services/laundryService';
 import { useSettings } from '../context/SettingsContext';
 
@@ -43,7 +43,7 @@ export const Dashboard = () => {
           { title: 'READY FOR PICKUP', val: metrics.readyForPickup, icon: '✅', color: 'border-success' },
           { title: 'REVENUE (ALL TIME)', val: `${settings?.currency || '$'}${metrics.revenue.toFixed(2)}`, icon: '💰', color: 'border-danger' }
         ].map((card, i) => (
-          <div className="col-md-3" key={i}>
+          <div className="col-sm-6 col-xl-3" key={i}>
             <div className={`card border-0 shadow-sm p-3 bg-white h-100 border-start border-4 ${card.color}`}>
               <div className="d-flex justify-content-between align-items-center">
                 <div>

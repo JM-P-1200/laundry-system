@@ -1,7 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSettings } from '../context/SettingsContext';
 import laundryService from '../services/laundryService';
+
+const getServicePrice = (serviceType, basePrice = 0) => {
+  const price = parseFloat(basePrice) || 0;
+  if (serviceType === 'Dry Cleaning') return price * 2.5;
+  if (serviceType === 'Comforter/Blanket') return price * 1.5;
+  return price;
+};
 
 export const NewOrder = () => {
   const { settings } = useSettings();
@@ -21,34 +28,22 @@ export const NewOrder = () => {
 
   // Dynamic order items array
   const [items, setItems] = useState([
-    { service_type: 'Wash/Dry/Fold', weight_kg: '', unit_price: 0 }
+    { service_type: 'Wash/Dry/Fold', weight_kg: '' }
   ]);
-
-  // Sync pricing settings directly to the form input rows
-  useEffect(() => {
-    if (settings) {
-      setItems(prev => prev.map(item => ({
-        ...item,
-        unit_price: item.service_type === 'Wash/Dry/Fold' ? settings.price_per_kg : 5.00
-      })));
-    }
-  }, [settings]);
 
   const handleItemChange = (index, field, value) => {
     const updated = [...items];
     updated[index][field] = value;
-    
-    // Automatically recalculate item premium rates if service selection mutates
-    if (field === 'service_type' && settings) {
-      if (value === 'Wash/Dry/Fold') updated[index].unit_price = settings.price_per_kg;
-      else if (value === 'Dry Cleaning') updated[index].unit_price = settings.price_per_kg * 2.5; // Premium scaling factor
-      else updated[index].unit_price = settings.price_per_kg * 1.5;
-    }
     setItems(updated);
   };
 
+  const pricedItems = items.map(item => ({
+    ...item,
+    unit_price: getServicePrice(item.service_type, settings?.price_per_kg)
+  }));
+
   // Safe floating point transaction calculations
-  const calculatedSubtotal = items.reduce((sum, item) => sum + ((parseFloat(item.weight_kg) || 0) * item.unit_price), 0);
+  const calculatedSubtotal = pricedItems.reduce((sum, item) => sum + ((parseFloat(item.weight_kg) || 0) * item.unit_price), 0);
   const applicableDelivery = customer.delivery_type === 'Delivery' ? (parseFloat(settings?.delivery_fee) || 0) : 0;
   const netGrandTotal = calculatedSubtotal + applicableDelivery;
 
@@ -58,7 +53,7 @@ export const NewOrder = () => {
     
     setLoading(true);
     try {
-      await laundryService.submitNewOrder(customer, items);
+      await laundryService.submitNewOrder(customer, pricedItems);
       alert('Order securely tracked to shop ledger!');
       navigate('/queue'); // Instantly routes operators into the queue layout view
     } catch (err) {
@@ -104,7 +99,7 @@ export const NewOrder = () => {
               </div>
               <div className="col-md-3">
                 <div className="fs-5 fw-bold text-dark pb-2 text-end">
-                  Total: {settings?.currency || '$'}{((parseFloat(item.weight_kg) || 0) * item.unit_price).toFixed(2)}
+                  Total: {settings?.currency || '$'}{((parseFloat(item.weight_kg) || 0) * getServicePrice(item.service_type, settings?.price_per_kg)).toFixed(2)}
                 </div>
               </div>
             </div>
@@ -154,13 +149,13 @@ export const NewOrder = () => {
             />
           </div>
 
-          <div className="bg-light rounded p-4 d-flex justify-content-between align-items-center mb-4">
+          <div className="bg-light rounded p-4 d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
             <div>
               <span className="text-muted d-block small fw-bold">ESTIMATED ORDER LEDGER SUM</span>
               <span className="fs-2 fw-black text-dark">{settings?.currency || '$'}{netGrandTotal.toFixed(2)}</span>
               {customer.delivery_type === 'Delivery' && <small className="text-info d-block">(Includes {settings?.currency}{settings?.delivery_fee} logistics premium)</small>}
             </div>
-            <button type="submit" disabled={loading} className="btn btn-primary btn-lg px-5 font-monospace fw-bold">
+            <button type="submit" disabled={loading} className="btn btn-primary btn-lg px-5 font-monospace fw-bold w-100 w-lg-auto">
               {loading ? 'PROCESSING TRANSACTION...' : '✅ EXECUTE INTAKE'}
             </button>
           </div>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSettings } from '../context/SettingsContext'; // 🌟 Connected Context
 
@@ -13,7 +12,7 @@ export const Home = () => {
           {/* 🌟 Uses the custom live shop name */}
           <h1 className="display-3 fw-bold mb-3">{settings?.shop_name || 'BubbleWorks'}, <br/>Simplified.</h1>
           <p className="lead mb-4 opacity-75">Premium fabric care delivered straight to your doorstep. <br/> Because your time is worth more than folding socks.</p>
-          <div className="d-flex justify-content-center gap-3">
+          <div className="d-flex flex-column flex-sm-row justify-content-center gap-3">
             <Link to="/track" className="btn btn-light btn-lg px-4 fw-bold text-primary">Track My Order</Link>
             <Link to="/services" className="btn btn-outline-light btn-lg px-4">View Prices</Link>
           </div>

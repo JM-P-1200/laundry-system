@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import laundryService from '../services/laundryService';
 
 export const Inventory = () => {
@@ -50,7 +50,7 @@ export const Inventory = () => {
           { title: 'TOTAL SKUs REGISTERED', val: totalSkus, icon: '📦', color: 'border-primary' },
           { title: 'CRITICAL LOW STOCK ALERTS', val: activeLowStockAlertsCount, icon: '⚠️', color: activeLowStockAlertsCount > 0 ? 'border-danger' : 'border-success' }
         ].map((tile, i) => (
-          <div className="col-md-6" key={i}>
+          <div className="col-sm-6" key={i}>
             <div className={`card border-0 shadow-sm p-3 bg-white border-start border-4 ${tile.color}`}>
               <div className="d-flex justify-content-between align-items-center">
                 <div>
@@ -92,7 +92,7 @@ export const Inventory = () => {
                       <small className="text-muted font-monospace">{item.category}</small>
                     </td>
                     <td>
-                      <div className="progress mb-1 rounded-pill" style={{ height: '7px', width: '220px', backgroundColor: '#e9ecef' }}>
+                      <div className="progress mb-1 rounded-pill" style={{ height: '7px', minWidth: '160px', maxWidth: '220px', backgroundColor: '#e9ecef' }}>
                         <div 
                           className={`progress-bar rounded-pill ${isCriticalStockLevelReached ? 'bg-danger' : 'bg-primary'}`} 
                           role="progressbar" 
